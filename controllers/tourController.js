@@ -192,3 +192,11 @@ exports.deleteTour = async (req, res) => {
     });
   }
 };
+
+exports.aliasTopTour = async (req, res, next) => {
+  //pre filling parts of query objects to get the cheapest tours
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
