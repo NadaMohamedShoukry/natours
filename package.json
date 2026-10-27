@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start:dev": "nodemon server.js",
-    "start:prod": "cross-env NODE_ENV=production nodemon server.js"
+    "start:prod": "cross-env NODE_ENV=production nodemon server.js",
+    "debug": "ndb server.js"
   },
   "keywords": [],
   "author": "nada shoukry",
@@ -16,7 +17,8 @@
     "express": "^4.22.2",
     "mongoose": "^5.13.23",
     "morgan": "^1.12.0",
-    "slugify": "^1.6.9"
+    "slugify": "^1.6.9",
+    "validator": "^13.15.35"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",

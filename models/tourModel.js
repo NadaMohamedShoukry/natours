@@ -2,14 +2,21 @@ const mongoose = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const slugify = require('slugify');
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+const validator = require('validator');
+
 const tourSchema = mongoose.Schema(
   // schema definition
   {
     name: {
       type: String,
-      required: [true, 'A tour must have a name.'],
+      required: [true, 'A tour must have a name.'], // validator
       unique: true,
       trim: true,
+      maxLength: [40, 'Tour name must have less or equal 40 characters'], //validator with strings
+      minLength: [10, 'Tour name must have more or equal 10 characters'], //validator  with strings
+      // not usufull here ... use it when you do not want numbers or spaces
+      // validate: [validator.isAlpha, 'Tour name must only contain charaters.'], // external library
     },
     slug: String,
     duration: {
@@ -23,10 +30,16 @@ const tourSchema = mongoose.Schema(
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty.'],
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: 'Difficulty is either: easy , difficult , medium ',
+      }, // validator only with strings
     },
     ratingsAverage: {
       type: Number,
       default: 4.5,
+      min: [1, 'Ratings must be more that 1.0'], //validator
+      max: [5, 'Ratings must be below 5.0'], //validator
     },
     ratingsQuantity: {
       type: Number,
@@ -38,6 +51,16 @@ const tourSchema = mongoose.Schema(
     },
     priceDiscount: {
       type: Number,
+      //custom validator
+      validate: {
+        validator: function (val) {
+          // will work only with create document
+          // it will not work on update document
+          return val < this.price;
+        },
+        // ({VALUE})not is JS but in mongoose
+        message: 'Discount ({VALUE}) must be less than the price',
+      },
     },
     summary: {
       type: String,

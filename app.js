@@ -1,6 +1,7 @@
 const express = require('express');
 // const { json } = require('stream/consumers');
 const morgan = require('morgan');
+const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -20,10 +21,10 @@ app.use(express.json());
 
 // built in middleware to access all the static files and images.
 app.use(express.static(`${__dirname}/public`));
-app.use((req, res, next) => {
-  console.log('hellp from middleware');
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log('hellp from middleware');
+//   next();
+// });
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString(); // to convert it to a readable string;
@@ -44,4 +45,32 @@ app.use((req, res, next) => {
 // create tour router middleware
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+// will run for all the HTTP methods
+// will run when the route isnot included in any of the previous routes
+// THIS SHOULD BE PUT AT THE END OF MIDDLEWARE STACK
+app.all('*', (req, res, next) => {
+  // res.status(404).json({
+  //   status: 'fail',
+  //   message: `Can't find ${req.originalUrl} in this server!`,
+  // });
+  // // next();
+
+  // use error constructor
+  const err = new Error(`Can't find ${req.originalUrl} in this server!`);
+  err.status = 'fail';
+  err.statusCode = 404;
+
+  next(err);
+});
+
+app.use((err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'error';
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
+  });
+});
 module.exports = app;
