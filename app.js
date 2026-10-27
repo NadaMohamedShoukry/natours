@@ -32,16 +32,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// app.get('/api/v1/tours', getAllTours);
-
-// app.get('/api/v1/tours/:id', getTour);
-
-// app.post('/api/v1/tours', addTour);
-
-// app.patch('/api/v1/tours/:id',updateTour );
-
-// app.delete('/api/v1/tours/:id',deleteTour );
-
 //mounting the routers
 // create tour router middleware
 app.use('/api/v1/tours', tourRouter);
@@ -51,11 +41,6 @@ app.use('/api/v1/users', userRouter);
 // will run when the route isnot included in any of the previous routes
 // THIS SHOULD BE PUT AT THE END OF MIDDLEWARE STACK
 app.all('*', (req, res, next) => {
-  // use error constructor
-  // const err = new Error(`Can't find ${req.originalUrl} in this server!`);
-  // err.status = 'fail';
-  // err.statusCode = 404;
-
   next(new AppError(`Can't find ${req.originalUrl} in this server!`, 404));
 });
 
