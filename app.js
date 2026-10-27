@@ -2,6 +2,7 @@ const express = require('express');
 // const { json } = require('stream/consumers');
 const morgan = require('morgan');
 const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -50,27 +51,13 @@ app.use('/api/v1/users', userRouter);
 // will run when the route isnot included in any of the previous routes
 // THIS SHOULD BE PUT AT THE END OF MIDDLEWARE STACK
 app.all('*', (req, res, next) => {
-  // res.status(404).json({
-  //   status: 'fail',
-  //   message: `Can't find ${req.originalUrl} in this server!`,
-  // });
-  // // next();
-
   // use error constructor
-  const err = new Error(`Can't find ${req.originalUrl} in this server!`);
-  err.status = 'fail';
-  err.statusCode = 404;
+  // const err = new Error(`Can't find ${req.originalUrl} in this server!`);
+  // err.status = 'fail';
+  // err.statusCode = 404;
 
-  next(err);
+  next(new AppError(`Can't find ${req.originalUrl} in this server!`, 404));
 });
 
-app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
-
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-  });
-});
+app.use(globalErrorHandler);
 module.exports = app;
