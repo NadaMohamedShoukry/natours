@@ -14,6 +14,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     // photo: req.body.photo || '',
+    role: req.body.role,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     passwordChangedAt: req.body.passwordChangedAt,
@@ -100,3 +101,19 @@ exports.authenticate = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+// Create a wrapper function that will return the middleware function.
+// because we can not pass arguments in a middleware function.
+exports.authorize =
+  (...roles) =>
+  // this middleware will have access to roles array because of cloures
+  (req, res, next) => {
+    // roles => ['admin' , 'lead-guide']
+    //req.user.role this comming from this line  req.user = currentUser; in the authenticate middleware
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('You are not authorized to perform this action.', 403),
+      );
+    }
+    next();
+  };
