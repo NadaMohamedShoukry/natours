@@ -4,6 +4,7 @@ const router = express.Router();
 
 //tourController object will be the equivelent to exports object.
 const tourController = require('../controllers/tourController');
+const authController = require('../controllers/authController');
 
 router
   .route('/top-5-cheap')
@@ -11,9 +12,10 @@ router
 // router.param('id', tourController.checkID);
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 router.route('/tour-stats').get(tourController.getTourStats);
+
 router
   .route('/')
-  .get(tourController.getAllTours)
+  .get(authController.authenticate, tourController.getAllTours)
   .post(tourController.createTour);
 router
   .route('/:id')
