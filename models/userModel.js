@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-
 const validator = require('validator');
-
+const crypto = require('crypto');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bycrpt = require('bcryptjs');
 
@@ -42,6 +41,8 @@ const userSchema = new mongoose.Schema({
     },
   },
   passwordChangedAt: { type: Date },
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 //To encrypt the password
@@ -61,7 +62,19 @@ userSchema.pre('save', async function (next) {
   // we do not need it to be saved in the database
   this.passwordConfirm = undefined;
 });
+userSchema.pre('save', async function (next) {
+  // if password is not modified or the document is already new ... return
+  if (!this.isModified('password') || this.isNew) return next();
 
+  // update the passwordChangedAt
+  // we subtracted 1s because sometimes updateing the database takes sometime so updating the
+  // passwordChangedAt may happen after the jwt has generated .. so that means that the user may not be able to
+  // login right away
+  // this makes sure that the token is generated after the password has changed
+  // not 100% accurate but it solves the problem
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
 //Instance Methods that work on documents
 userSchema.methods.correctPassword = async function (
   passedPassword,
@@ -81,6 +94,21 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   }
 
   return false; // no password changed
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  // generate a token
+  const resetToken = crypto.randomBytes(32).toString('hex'); // resetToken in hexa code
+
+  // encrypt the token
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  console.log({ resetToken }, this.passwordResetToken);
+  return resetToken;
 };
 const User = mongoose.model('User', userSchema);
 module.exports = User;
