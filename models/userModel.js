@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: { type: Date },
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false, // we do not want to show this flag in the output
+  },
 });
 
 //To encrypt the password
@@ -73,6 +78,15 @@ userSchema.pre('save', async function (next) {
   // this makes sure that the token is generated after the password has changed
   // not 100% accurate but it solves the problem
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+// Query Middleware
+// Remove user with active = false
+userSchema.pre(/^find/, function (next) {
+  // this refers to the current query
+  //query all the docs that has active:true and ignore active:false
+  this.find({ active: { $ne: false } });
   next();
 });
 //Instance Methods that work on documents
