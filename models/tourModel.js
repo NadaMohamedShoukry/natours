@@ -113,7 +113,14 @@ const tourSchema = mongoose.Schema(
         day: Number, //day of the tour
       },
     ],
-    guides: Array,
+    // guides: Array, solution 1 embedding
+    guides: [
+      // solution 2 referencing  ---- here we will store guides ids without geting the docs.
+      {
+        type: mongoose.Schema.ObjectId, // will store mongo object ids
+        ref: 'User',
+      },
+    ],
   },
 
   // schema options
@@ -157,11 +164,13 @@ tourSchema.post('save', function (doc, next) {
 // This is the solution t embed user docs in the tours
 // each id in the array of guides in tours will get the user doc behind the scenes
 // works only with creating docs ... so we need to write the same logic for updates
-tourSchema.pre('save', async function (next) {
-  const guidePromises = this.guides.map(async (id) => User.findById(id));
-  this.guides = await Promise.all(guidePromises);
-  next();
-});
+// tourSchema.pre('save', async function (next) {
+//   const guidePromises = this.guides.map(async (id) => User.findById(id));
+//   this.guides = await Promise.all(guidePromises);
+//   next();
+// });
+
+//////////////////////////////////////////////////////////////////////////
 // QUERY MIDDLEWARE
 // this one works only with find query
 // we want to make it work with all the expressions that start with find like findOne
@@ -171,6 +180,14 @@ tourSchema.pre(/^find/, function (next) {
   // filter out true secret tours
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
+  next();
+});
+//to populate the ref users in the tours
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
   next();
 });
 //docs =>all the documents returned from the query
