@@ -17,6 +17,7 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 
 const app = express();
 // 1- Global Middlewares
@@ -78,6 +79,7 @@ app.use((req, res, next) => {
 // create tour router middleware
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 // will run for all the HTTP methods
 // will run when the route isnot included in any of the previous routes
