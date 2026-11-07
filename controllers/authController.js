@@ -75,8 +75,25 @@ const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
+
 const createSendToken = (user, statusCode, message, res) => {
   const token = signToken(user._id);
+  // send the token in a cookie to the user
+  // cookie name , value , options
+  const cookieOptions = {
+    expire: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN + 24 + 60 + 60 + 1000,
+    ),
+    // won't work unless we use HTTPS , we want to make it work in production.
+    // secure: true, //  the cookie will only be sent in an encrypted connection.
+    httpOnly: true, // the cookies can not be accessed or modified in any way by the browser.
+  };
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+  res.cookie('jwt', token, cookieOptions);
+
+  // remove the password from the output
+  // because it is showing in the output due to new document creation even though we sit the select=false
+  user.password = undefined;
   res.status(statusCode).json({
     status: 'success',
     message,
