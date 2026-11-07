@@ -5,6 +5,8 @@ const slugify = require('slugify');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const validator = require('validator');
 
+const User = require('./userModel');
+
 const tourSchema = mongoose.Schema(
   // schema definition
   {
@@ -86,7 +88,34 @@ const tourSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      //geoJSON -> in order to model geospatial data
+      type: {
+        type: String,
+        default: 'Point', // geoMetries default value .... we also have polygon , line.
+        enum: ['Point'], // because it is a location.
+      },
+      coordinates: [Number], // array of numbers with the longitude first then the latitude (That is how it works in geoJSON)
+      address: String,
+      description: String,
+    },
+    //In order to have a document embeded in another document we need an array
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number, //day of the tour
+      },
+    ],
+    guides: Array,
   },
+
   // schema options
   {
     // to show virtual properties in the output
@@ -125,7 +154,14 @@ tourSchema.post('save', function (doc, next) {
   console.log(doc);
   next();
 });
-
+// This is the solution t embed user docs in the tours
+// each id in the array of guides in tours will get the user doc behind the scenes
+// works only with creating docs ... so we need to write the same logic for updates
+tourSchema.pre('save', async function (next) {
+  const guidePromises = this.guides.map(async (id) => User.findById(id));
+  this.guides = await Promise.all(guidePromises);
+  next();
+});
 // QUERY MIDDLEWARE
 // this one works only with find query
 // we want to make it work with all the expressions that start with find like findOne

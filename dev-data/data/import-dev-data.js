@@ -25,9 +25,7 @@ mongoose
 
 //READ THE JSON FILE
 //should convert the json to js object in order to pass it to the create method
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8'),
-);
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 
 // IMPORT DATA INTO DB
 
