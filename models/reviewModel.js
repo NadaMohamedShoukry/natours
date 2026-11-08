@@ -30,14 +30,14 @@ const reviewSchema = mongoose.Schema(
   }, // schema options
   {
     // to show virtual properties in the output
-    toJSON: { virtual: true },
-    toObject: { virtual: true },
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 
 reviewSchema.pre(/^find/, function (next) {
   this.populate({ path: 'user', select: 'name photo' });
-  this.populate({ path: 'tour', select: 'name' });
+  // this.populate({ path: 'tour', select: 'name' });
   next();
 });
 const Review = mongoose.model('Review', reviewSchema);

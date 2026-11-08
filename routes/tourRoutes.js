@@ -5,6 +5,7 @@ const router = express.Router();
 //tourController object will be the equivelent to exports object.
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
+const reviewController = require('../controllers/reviewController');
 
 router
   .route('/top-5-cheap')
@@ -26,5 +27,11 @@ router
     authController.authorize('admin', 'lead-guide'),
     tourController.deleteTour,
   );
-
+router
+  .route('/:tourId/reviews')
+  .post(
+    authController.authenticate,
+    authController.authorize('user'),
+    reviewController.createReview,
+  );
 module.exports = router;

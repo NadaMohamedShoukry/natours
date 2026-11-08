@@ -4,6 +4,10 @@ const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 
 exports.createReview = catchAsync(async (req, res) => {
+  //Allow nested routes
+  if (!req.body.tour) req.body.tour = req.params.tourId;
+  if (!req.body.user) req.body.user = req.user.id; // from protected route
+
   const review = await Review.create(req.body);
 
   return res.status(201).json({

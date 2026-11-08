@@ -76,7 +76,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
   // //when we multiply a string that is a number * 1 it will convert it to a number
   // const id = req.params.id * 1;
   // const tour = tours.find((el) => el.id === id);
-  const tour = await Tour.findById(req.params.id);
+  const tour = await Tour.findById(req.params.id).populate('reviews');
   // Tour.findOne({_id:req.params.id})
 
   if (!tour) return next(new AppError('No tour found with this ID', 404));

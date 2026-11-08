@@ -126,8 +126,8 @@ const tourSchema = mongoose.Schema(
   // schema options
   {
     // to show virtual properties in the output
-    toJSON: { virtual: true },
-    toObject: { virtual: true },
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 
@@ -138,6 +138,14 @@ const tourSchema = mongoose.Schema(
 // (this is bussiness logic s we calculated it in the model)
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
+});
+
+//Virtual Populate
+// reviews referes to a virtual field that is going to show on query not saved in database
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour', /// comming from tour in Reviews
+  localField: '_id', // The id from the Tour model
 });
 
 // DOCUMENT MIDDLEWARE
