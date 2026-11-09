@@ -19,8 +19,10 @@ exports.createReview = catchAsync(async (req, res) => {
   });
 });
 
-exports.allReviews = catchAsync(async (req, res) => {
-  const features = new APIFeatures(Review.find(), req.query)
+exports.allReviews = catchAsync(async (req, res, next) => {
+  let filter = {};
+  if (req.params.tourId) filter = { tour: req.params.tourId };
+  const features = new APIFeatures(Review.find(filter), req.query)
     .sort()
     .paginathion();
   const reviews = await features.query;

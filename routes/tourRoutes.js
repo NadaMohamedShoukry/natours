@@ -5,7 +5,7 @@ const router = express.Router();
 //tourController object will be the equivelent to exports object.
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
-const reviewController = require('../controllers/reviewController');
+const reviewRouter = require('./reviewRoutes');
 
 router
   .route('/top-5-cheap')
@@ -27,11 +27,17 @@ router
     authController.authorize('admin', 'lead-guide'),
     tourController.deleteTour,
   );
-router
-  .route('/:tourId/reviews')
-  .post(
-    authController.authenticate,
-    authController.authorize('user'),
-    reviewController.createReview,
-  );
+
+// Post tour/12345/reviews
+// not the best way (duplicate code)
+// router
+//   .route('/:tourId/reviews')
+//   .post(
+//     authController.authenticate,
+//     authController.authorize('user'),
+//     reviewController.createReview,
+//   );
+
+// will first go to tour router then redirected to review router
+router.use('/:tourId/reviews', reviewRouter);
 module.exports = router;

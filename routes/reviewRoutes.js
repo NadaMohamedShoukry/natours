@@ -1,10 +1,12 @@
 const express = require('express');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 const reviewController = require('../controllers/reviewController');
 const authController = require('../controllers/authController');
 
+// Post tour/12345/reviews  mergeParams will get the tourId fron tours router
+// Post / -> reviews
 router
   .route('/')
   .post(
