@@ -3,6 +3,7 @@ const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 // );
@@ -40,94 +41,32 @@ exports.aliasTopTour = async (req, res, next) => {
   next();
 };
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  //Execute the query
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginathion();
-  const tours = await features.query;
+exports.getAllTours = factory.getAllDocuments(Tour);
+//query params ... first way
 
-  //Send response
-  return res.status(200).json({
-    status: 'success',
-    requestedAt: req.requestTime,
-    result: tours.length,
-    data: {
-      tours,
-    },
-  });
-  //query params ... first way
+// const tours = await Tour.find({
+//   duration: 5,
+//   difficulty: 'easy',
+// });
+// second way using mongoose methods
+// Tour.find() => this returns a query that is why we can chain where and equals
+// const tours = await Tour.find()
+//   .where('duration')
+//   .equals(5)
+//   .where('difficulty')
+//   .equals('easy');
 
-  // const tours = await Tour.find({
-  //   duration: 5,
-  //   difficulty: 'easy',
-  // });
-  // second way using mongoose methods
-  // Tour.find() => this returns a query that is why we can chain where and equals
-  // const tours = await Tour.find()
-  //   .where('duration')
-  //   .equals(5)
-  //   .where('difficulty')
-  //   .equals('easy');
-});
-exports.getTour = catchAsync(async (req, res, next) => {
-  // //when we multiply a string that is a number * 1 it will convert it to a number
-  // const id = req.params.id * 1;
-  // const tour = tours.find((el) => el.id === id);
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-  // Tour.findOne({_id:req.params.id})
-
-  if (!tour) return next(new AppError('No tour found with this ID', 404));
-  return res.status(200).json({
-    status: 'success',
-    message: 'Tour retrieved successfully.',
-    data: {
-      tour,
-    },
-  });
-});
-
-exports.createTour = catchAsync(async (req, res, next) => {
-  // const newTour = new Tour({})
-  // call the save method on the document
-  // newTour.save()
-  //call create on the Tour model
-  const newTour = await Tour.create(req.body);
-  return res.status(201).json({
-    status: 'success',
-    message: 'Tour added successfully.',
-    data: {
-      tours: newTour,
-    },
-  });
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true, // return the newly updated tour
-    runValidators: true,
-  });
-  if (!tour) return next(new AppError('No tour found with this ID', 404));
-  return res.status(200).json({
-    status: 'success',
-    message: 'Tour updated successfully.',
-    data: {
-      tour,
-    },
-  });
-});
-
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  // no content
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-  if (!tour) return next(new AppError('No tour found with this ID', 404));
-  return res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
+// //when we multiply a string that is a number * 1 it will convert it to a number
+// const id = req.params.id * 1;
+// const tour = tours.find((el) => el.id === id);
+exports.getTour = factory.getOneDocument(Tour, { path: 'reviews' });
+// const newTour = new Tour({})
+// call the save method on the document
+// newTour.save()
+//call create on the Tour model
+exports.createTour = factory.createDocument(Tour);
+exports.updateTour = factory.updateDocument(Tour);
+exports.deleteTour = factory.deleteDocument(Tour);
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([

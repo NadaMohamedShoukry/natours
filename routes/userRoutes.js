@@ -22,14 +22,15 @@ router.delete(
   userController.deleteMe,
 );
 
-router
-  .route('/')
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+router.route('/').get(userController.getAllUsers);
 router
   .route('/:id')
   .get(userController.getUser)
   .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .delete(
+    authController.authenticate,
+    authController.authorize('admin'),
+    userController.deleteUser,
+  );
 
 module.exports = router;

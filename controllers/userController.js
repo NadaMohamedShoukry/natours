@@ -1,7 +1,7 @@
 const User = require('../models/userModel');
-const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
 
 const filteredObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -12,19 +12,6 @@ const filteredObj = (obj, ...allowedFields) => {
   });
   return newObj;
 };
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-
-  //Send response
-  return res.status(200).json({
-    status: 'success',
-    requestedAt: req.requestTime,
-    result: users.length,
-    data: {
-      users,
-    },
-  });
-});
 
 // to make the user update his own data
 exports.updateMe = catchAsync(async (req, res, next) => {
@@ -63,27 +50,11 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
-exports.createUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet provided!',
-  });
-};
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet provided!',
-  });
-};
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet provided!',
-  });
-};
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet provided!',
-  });
-};
+exports.getAllUsers = factory.getAllDocuments(User);
+exports.getUser = factory.getOneDocument(User);
+
+//The Admin can update the user from database.
+//Update all data but not passwords
+exports.updateUser = factory.updateDocument(User);
+//The Admin can delete the user from database.
+exports.deleteUser = factory.deleteDocument(User);

@@ -12,6 +12,7 @@ router
   .post(
     authController.authenticate,
     authController.authorize('user'),
+    reviewController.setTourUserIds,
     reviewController.createReview,
   )
   .get(
@@ -26,6 +27,15 @@ router
     authController.authenticate,
     authController.authorize('user'),
     reviewController.review,
+  )
+  .patch(
+    authController.authenticate,
+    authController.authorize('user'),
+    reviewController.updateReview,
+  )
+  .delete(
+    authController.authenticate,
+    authController.authorize('user'),
+    reviewController.deleteReview,
   );
-
 module.exports = router;

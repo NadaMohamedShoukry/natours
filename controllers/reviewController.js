@@ -2,51 +2,18 @@ const catchAsync = require('../utils/catchAsync');
 const Review = require('../models/reviewModel');
 const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
+const factory = require('./handlerFactory');
 
-exports.createReview = catchAsync(async (req, res) => {
+exports.setTourUserIds = (req, res, next) => {
   //Allow nested routes
   if (!req.body.tour) req.body.tour = req.params.tourId;
   if (!req.body.user) req.body.user = req.user.id; // from protected route
+  next();
+};
+exports.createReview = factory.createDocument(Review);
 
-  const review = await Review.create(req.body);
+exports.allReviews = factory.getAllDocuments(Review);
 
-  return res.status(201).json({
-    status: 'success',
-    message: 'Review created successfully',
-    data: {
-      review,
-    },
-  });
-});
-
-exports.allReviews = catchAsync(async (req, res, next) => {
-  let filter = {};
-  if (req.params.tourId) filter = { tour: req.params.tourId };
-  const features = new APIFeatures(Review.find(filter), req.query)
-    .sort()
-    .paginathion();
-  const reviews = await features.query;
-
-  res.status(200).json({
-    status: 'success',
-    message: 'Reviews retrieved successfully.',
-    results: reviews.length,
-    data: {
-      reviews,
-    },
-  });
-});
-
-exports.review = catchAsync(async (req, res, next) => {
-  const review = await Review.findById(req.params.id);
-  if (!review) {
-    return next(new AppError('Review is not found!', 404));
-  }
-  res.status(200).json({
-    status: 'success',
-    message: 'Review retrieved successfully.',
-    data: {
-      review,
-    },
-  });
-});
+exports.review = factory.getOneDocument(Review);
+exports.updateReview = factory.updateDocument(Review);
+exports.deleteReview = factory.deleteDocument(Review);
