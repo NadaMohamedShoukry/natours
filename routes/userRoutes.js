@@ -9,36 +9,32 @@ router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
+
+//router is a mini app and running this middleware will protect all the routes that come after it
+router.use(authController.authenticate);
+
 router.patch(
   '/updatePassword',
-  authController.authenticate,
+
   authController.updatePassword,
 );
 
 router.patch('/updateMe', authController.authenticate, userController.updateMe);
 router.delete(
   '/deleteMe',
-  authController.authenticate,
+
   userController.deleteMe,
 );
 
-router
-  .route('/me')
-  .get(
-    authController.authenticate,
-    userController.getMe,
-    userController.getUser,
-  );
+router.route('/me').get(userController.getMe, userController.getUser);
 
+//authorize anly to admins
+router.use(authController.authorize('admin'));
 router.route('/').get(userController.getAllUsers);
 router
   .route('/:id')
   .get(userController.getUser)
   .patch(userController.updateUser)
-  .delete(
-    authController.authenticate,
-    authController.authorize('admin'),
-    userController.deleteUser,
-  );
+  .delete(userController.deleteUser);
 
 module.exports = router;

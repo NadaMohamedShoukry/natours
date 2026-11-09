@@ -30,12 +30,12 @@ router
   )
   .patch(
     authController.authenticate,
-    authController.authorize('user'),
+    authController.authorize('user', 'admin'),
     reviewController.updateReview,
   )
   .delete(
     authController.authenticate,
-    authController.authorize('user'),
+    authController.authorize('user', 'admin'),
     reviewController.deleteReview,
   );
 module.exports = router;
