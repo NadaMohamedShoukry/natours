@@ -22,6 +22,14 @@ router.delete(
   userController.deleteMe,
 );
 
+router
+  .route('/me')
+  .get(
+    authController.authenticate,
+    userController.getMe,
+    userController.getUser,
+  );
+
 router.route('/').get(userController.getAllUsers);
 router
   .route('/:id')

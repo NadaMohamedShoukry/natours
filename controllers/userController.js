@@ -3,6 +3,11 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
 const filteredObj = (obj, ...allowedFields) => {
   const newObj = {};
   // looping over the object to get the matched keys
@@ -50,6 +55,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+
 exports.getAllUsers = factory.getAllDocuments(User);
 exports.getUser = factory.getOneDocument(User);
 
