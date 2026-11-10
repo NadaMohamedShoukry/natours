@@ -36,6 +36,10 @@ const reviewSchema = mongoose.Schema(
     toObject: { virtuals: true },
   },
 );
+// to prevent duplicate reviews (reviews from the same user to the same tour)
+//each cobination of tour and user has always to be true.
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 reviewSchema.statics.calcAverageRating = async function (tourId) {
   const stats = await this.aggregate([
     { $match: { tour: tourId } },
