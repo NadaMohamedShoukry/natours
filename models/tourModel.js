@@ -130,7 +130,10 @@ const tourSchema = mongoose.Schema(
     toObject: { virtuals: true },
   },
 );
-
+//Apply index to enhance the read - performace
+// tourSchema.index({ price: 1});  // single index
+tourSchema.index({ price: 1, ratingsAverage: -1 }); //compound index - order is important
+tourSchema.index({ slug: 1 });
 // use reqular function t have access to this keyword.
 // this this refer to the current document
 // durationWeeks will not be saved in database but will be calculate as soon as we get the data.

@@ -70,6 +70,7 @@ exports.getAllDocuments = (Model) =>
       .sort()
       .limitFields()
       .paginathion();
+    // const docs = await features.query.explain();
     const docs = await features.query;
 
     //Send response

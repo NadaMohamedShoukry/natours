@@ -1,7 +1,5 @@
-const catchAsync = require('../utils/catchAsync');
 const Review = require('../models/reviewModel');
-const APIFeatures = require('../utils/apiFeatures');
-const AppError = require('../utils/appError');
+
 const factory = require('./handlerFactory');
 
 exports.setTourUserIds = (req, res, next) => {
