@@ -1,5 +1,6 @@
 // const fs = require('fs');
 const Tour = require('../models/tourModel');
+const AppError = require('../utils/appError');
 
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
@@ -141,6 +142,90 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     message: 'Stats retreived successfully.',
     data: {
       plan,
+    },
+  });
+});
+
+exports.getTourWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+  //  these numbers are the radius of earth miles ,  kilometers
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+  if (!lat || !lng) {
+    return next(
+      new AppError(
+        'Please provide latitude and longitude in the fromat lat,lng.',
+        400,
+      ),
+    );
+  }
+  const tours = await Tour.find({
+    //lng here must come before lat
+    // radius must be in radians.
+    //$geoWithin -> geospatial operator
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+  console.log(distance, lat, lng, unit);
+  res.status(200).json({
+    status: 'success',
+    message: 'Documents retrieved successfully!',
+    results: tours.length,
+    data: {
+      data: tours,
+    },
+  });
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+  //  these numbers are the radius of earth miles ,  kilometers
+  if (!lat || !lng) {
+    return next(
+      new AppError(
+        'Please provide latitude and longitude in the fromat lat,lng.',
+        400,
+      ),
+    );
+  }
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+  //geospacial aggregation is only one stage in aggregation (geoNear)
+  const distances = await Tour.aggregate([
+    {
+      //geoNear must be the first stage
+      //geoNear requires that on of the fields contains geospatial index
+      //already start location has 2d sphere gespatial index
+      //geoNear will use the index to perform the calculations
+      //if there are multiple fields with indexes then we need to use keys parameter.
+      $geoNear: {
+        // will hold the point (lat,lng)
+        //define it as geoJson
+        near: {
+          type: 'Point',
+          //multiply by 1 to convert it to number
+          coordinates: [lng * 1, lat * 1],
+        },
+        // the name of the field that will be created
+        // and where all the distances will be stored
+        distanceField: 'distance',
+        distanceMultiplier: multiplier, // Convert meters to kilometers
+        key: 'startLocation',
+      },
+    },
+    {
+      // only keep the distance and name
+      $project: {
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+  res.status(200).json({
+    status: 'success',
+    message: 'Documents retrieved successfully!',
+
+    data: {
+      data: distances,
     },
   });
 });

@@ -135,6 +135,7 @@ const tourSchema = mongoose.Schema(
 // tourSchema.index({ price: 1});  // single index
 tourSchema.index({ price: 1, ratingsAverage: -1 }); //compound index - order is important
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' }); // earth like sphere that will store the geospatial data.
 // use reqular function t have access to this keyword.
 // this this refer to the current document
 // durationWeeks will not be saved in database but will be calculate as soon as we get the data.
@@ -173,7 +174,7 @@ tourSchema.post('save', function (doc, next) {
   console.log(doc);
   next();
 });
-// This is the solution t embed user docs in the tours
+// This is the solution to embed user docs in the tours
 // each id in the array of guides in tours will get the user doc behind the scenes
 // works only with creating docs ... so we need to write the same logic for updates
 // tourSchema.pre('save', async function (next) {
@@ -211,12 +212,12 @@ tourSchema.post(/^find/, function (docs, next) {
 
 // We want to execlude the secret tour from the aggregation
 // AGGREGATION MIDDLEWARE
-tourSchema.pre('aggregate', function (next) {
-  // filter out true secret tours
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  // console.log(this.pipeline()) // returns an array
-  next();
-});
+// tourSchema.pre('aggregate', function (next) {
+//   // filter out true secret tours
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   // console.log(this.pipeline()) // returns an array
+//   next();
+// });
 const Tour = mongoose.model('Tour', tourSchema);
 
 //default exports
