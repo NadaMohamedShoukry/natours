@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 // const { json } = require('stream/consumers');
 const morgan = require('morgan');
@@ -5,12 +6,10 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const rateLimit = require('express-rate-limit');
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 const mongoSanitize = require('express-mongo-sanitize');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const xss = require('xss-clean');
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 const hpp = require('hpp');
 const AppError = require('./utils/appError');
@@ -18,9 +17,20 @@ const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
+//set up pug engine
+app.set('view engine', 'pug');
+//pug templates are called views in express because they are views in model view controller
+app.set('views', path.join(__dirname, 'views'));
 // 1- Global Middlewares
+
+//Serving Static files
+// built in middleware to access all the static files and images.
+// app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Set security HTTP headers
 // should be put on the top of the stack
 app.use(helmet());
@@ -66,9 +76,6 @@ app.use(
     ], // to allow duplicate query string
   }),
 );
-//Serving Static files
-// built in middleware to access all the static files and images.
-app.use(express.static(`${__dirname}/public`));
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString(); // to convert it to a readable string;
@@ -76,6 +83,8 @@ app.use((req, res, next) => {
 });
 
 //mounting the routers
+
+app.use('/', viewRouter);
 // create tour router middleware
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
