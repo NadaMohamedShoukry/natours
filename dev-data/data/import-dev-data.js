@@ -36,30 +36,66 @@ const reviews = JSON.parse(
 
 // IMPORT DATA INTO DB
 
+// const importData = async () => {
+//   try {
+//     await Tour.create(tours);
+//     await User.create(users, { validateBeforeSave: false }); // because of the validation on passwordConfirm
+//     await Review.create(reviews);
+
+//     console.log('Data successfully loaded.');
+//   } catch (err) {
+//     console.log(err);
+//   }
+//   process.exit();
+// };
+
+// const deleteData = async () => {
+//   try {
+//     await Tour.deleteMany();
+//     await User.deleteMany();
+//     await Review.deleteMany();
+
+//     console.log('Data successfully deleted.');
+//   } catch (err) {
+//     console.log(err);
+//   }
+//   process.exit();
+// };
 const importData = async () => {
   try {
-    await Tour.create(tours);
-    await User.create(users, { validateBeforeSave: false }); // because of the validation on passwordConfirm
-    await Review.create(reviews);
+    await mongoose.connect(DB);
 
-    console.log('Data successfully loaded.');
+    console.log('Database connected successfully');
+
+    // await Tour.create(tours);
+    // console.log('Tours imported successfully');
+
+    // await User.create(users, { validateBeforeSave: false });
+    // console.log('Users imported successfully');
+
+    await Review.create(reviews);
+    console.log('Reviews imported successfully');
   } catch (err) {
-    console.log(err);
+    console.error('Import error:', err);
+  } finally {
+    await mongoose.disconnect();
   }
-  process.exit();
 };
 
 const deleteData = async () => {
   try {
+    await mongoose.connect(DB);
+
     await Tour.deleteMany();
     await User.deleteMany();
     await Review.deleteMany();
 
-    console.log('Data successfully deleted.');
+    console.log('Data successfully deleted');
   } catch (err) {
-    console.log(err);
+    console.error('Delete error:', err);
+  } finally {
+    await mongoose.disconnect();
   }
-  process.exit();
 };
 
 // we use it to build command lines

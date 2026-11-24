@@ -7,6 +7,6 @@ const router = express.Router();
 // get -> for rendering templates in the browser
 
 router.get('/', viewsController.getOverview);
-router.get('/tour', viewsController.getTourDetails);
+router.get('/tour/:slug', viewsController.getTourDetails);
 
 module.exports = router;

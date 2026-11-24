@@ -33,7 +33,31 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Set security HTTP headers
 // should be put on the top of the stack
-app.use(helmet());
+// app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", 'https://api.mapbox.com'],
+        styleSrc: ["'self'", 'https://api.mapbox.com', "'unsafe-inline'"],
+        connectSrc: [
+          "'self'",
+          'https://api.mapbox.com',
+          'https://events.mapbox.com',
+        ],
+        imgSrc: [
+          "'self'",
+          'data:',
+          'blob:',
+          'https://api.mapbox.com',
+          'https://*.tiles.mapbox.com',
+        ],
+        workerSrc: ["'self'", 'blob:'],
+      },
+    },
+  }),
+);
 
 if (process.env.NODE_ENV === 'development') {
   //to get information about the request that we sent in the console
