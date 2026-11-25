@@ -12,6 +12,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const hpp = require('hpp');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const cookieParser = require('cookie-parser');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
@@ -39,7 +41,11 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", 'https://api.mapbox.com'],
+        scriptSrc: [
+          "'self'",
+          'https://api.mapbox.com',
+          'https://cdnjs.cloudflare.com',
+        ],
         styleSrc: ["'self'", 'https://api.mapbox.com', "'unsafe-inline'"],
         connectSrc: [
           "'self'",
@@ -58,11 +64,14 @@ app.use(
     },
   }),
 );
+//parser for the data in cookie
+app.use(cookieParser());
 
 if (process.env.NODE_ENV === 'development') {
   //to get information about the request that we sent in the console
   app.use(morgan('dev'));
 }
+
 //To prevent attacks like denial of service and brute force
 //count the number of requests comming from the same IP in a certain amount of time.
 const limiter = rateLimit({

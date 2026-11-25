@@ -16,7 +16,11 @@ exports.authenticate = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } //if there is no token in the quthorization header.
+  else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
+  console.log(req.cookies);
   console.log(token);
   if (!token) {
     return next(
@@ -54,7 +58,33 @@ exports.authenticate = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+//To check if the user is logged in or not
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.cookies.jwt) {
+    //1 - verify the token
+    // made jwt.verify return a promise so we do not break the async flow
+    const decoded = await promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET,
+    );
 
+    // 2 - check if the user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) return next();
+
+    //3 - check if the user has recently changed their password
+    // iat => issued at
+    if (currentUser.changedPasswordAfter(decoded.iat)) return next();
+
+    // there is a logged in user
+
+    // pug templates will have access tp response.locals
+    // user will be a variable available in pug templates
+    res.locals.user = currentUser;
+    return next();
+  }
+  next();
+});
 // Create a wrapper function that will return the middleware function.
 // because we can not pass arguments in a middleware function.
 exports.authorize =
